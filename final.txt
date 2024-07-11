@@ -1,0 +1,313 @@
+http://localhost:7070/swagger-ui/index.html#/railway-controller/update
+
+src/main/java
+
+Application.java
+package com.train;
+
+import org.modelmapper.Conditions;
+import org.modelmapper.ModelMapper;
+import org.modelmapper.convention.MatchingStrategies;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.annotation.Bean;
+
+@SpringBootApplication
+public class Application {
+
+	public static void main(String[] args) {
+		SpringApplication.run(Application.class, args);
+	}
+
+	@Bean // equivalent to <bean id ..../> in xml file
+	public ModelMapper mapper() {
+		ModelMapper modelMapper = new ModelMapper();
+		modelMapper.getConfiguration()
+		.setMatchingStrategy(MatchingStrategies.STRICT)
+		.setPropertyCondition(Conditions.isNotNull());
+		return modelMapper;
+	}
+
+}
+
+com.train.controller
+RailwayController.java
+
+package com.train.controller;
+
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.repository.query.Param;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.train.entity.Railway;
+import com.train.service.RailwayServices;
+@RestController
+@RequestMapping("railway")
+public class RailwayController {
+	@Autowired
+	private RailwayServices service;
+	
+	@PostMapping
+	public String AddRailway(@RequestBody Railway rail) {
+		System.out.println("added data");
+		service.AddDetails(rail);
+		
+		return "data added successfully";
+		
+	}
+	@GetMapping
+	public List<Railway>getAll()
+	{
+		return service.getAll();
+	}
+	
+	@DeleteMapping("/{id}")
+	public String deleteRailway(@PathVariable Long id)
+	{
+		service.removeRailway(id);
+		return "Railway removed!!!";
+				
+		
+	}
+	
+	@PatchMapping
+	public String update(@RequestBody Railway rail)
+	{
+		service.updateRailway(rail);
+		return "Railway Updated...";
+	}
+	
+	@GetMapping("/sort")
+	public List<Railway> SortRailway()
+	{
+		
+	return	service.SortRailway();
+		
+	}
+ 
+	
+}
+com.train.entity
+Enum Category.java
+package com.train.entity;
+
+public enum Category {
+
+	EXPRESS, SHATABDI, METRO
+}
+
+
+Railway.java
+
+package com.train.entity;
+
+import java.time.LocalTime;
+
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.Table;
+
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
+
+@Entity
+@NoArgsConstructor@AllArgsConstructor@ToString
+
+@Table(name="railway")
+public class Railway {
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private Long id;
+	private String name;
+	private Category category;
+	private LocalTime startTime;
+	private LocalTime endTime;
+	private String source;
+	private String destination;
+	private int code;
+	private int distance;
+	private int frequency;
+	public Long getId() {
+		return id;
+	}
+	public void setId(Long id) {
+		this.id = id;
+	}
+	public String getName() {
+		return name;
+	}
+	public void setName(String name) {
+		this.name = name;
+	}
+	public Category getCategory() {
+		return category;
+	}
+	public void setCategory(Category category) {
+		this.category = category;
+	}
+	public LocalTime getStartTime() {
+		return startTime;
+	}
+	public void setStartTime(LocalTime startTime) {
+		this.startTime = startTime;
+	}
+	public LocalTime getEndTime() {
+		return endTime;
+	}
+	public void setEndTime(LocalTime endTime) {
+		this.endTime = endTime;
+	}
+	public String getSource() {
+		return source;
+	}
+	public void setSource(String source) {
+		this.source = source;
+	}
+	public String getDestination() {
+		return destination;
+	}
+	public void setDestination(String destination) {
+		this.destination = destination;
+	}
+	public int getCode() {
+		return code;
+	}
+	public void setCode(int code) {
+		this.code = code;
+	}
+	public int getDistance() {
+		return distance;
+	}
+	public void setDistance(int distance) {
+		this.distance = distance;
+	}
+	public int getFrequency() {
+		return frequency;
+	}
+	public void setFrequency(int frequency) {
+		this.frequency = frequency;
+	}
+}
+com.train.repository
+interface
+RailwayRepository.java
+package com.train.repository;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+
+import com.train.entity.Railway;
+
+public interface RailwayRepository extends JpaRepository<Railway, Long> { 
+}
+
+com.train.service
+RailwayServiceImpl.java
+package com.train.service;
+
+import java.util.Comparator;
+import java.util.List;
+
+import javax.transaction.Transactional;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.train.entity.Railway;
+import com.train.repository.RailwayRepository;
+
+@Service
+@Transactional
+public class RailwayServiceImpl implements RailwayServices{
+
+	@Autowired
+	private RailwayRepository repo;
+	@Override
+	public void AddDetails(Railway rail){		
+		 repo.save(rail);
+	}
+	@Override
+	public List<Railway> getAll() {
+		return repo.findAll();
+		
+	}
+	@Override
+	public void removeRailway(Long id) {
+		repo.deleteById(id);
+		
+	}
+	
+	@Override
+	public void updateRailway(Railway rail)
+	{
+		  repo.save(rail);
+	}
+
+	@Override
+	public List<Railway> SortRailway()
+	{
+	    List<Railway> rail = getAll();
+	    rail.sort(Comparator.comparing(r -> r.getCategory().name()));
+		return rail;
+		
+	}	
+}
+interface
+RailwayServices.java
+package com.train.service;
+
+import java.util.List;
+
+import com.train.entity.Railway;
+
+public interface RailwayServices {
+	void AddDetails(Railway rail);
+	List<Railway> getAll();
+	void removeRailway(Long id);
+	void updateRailway(Railway  rail);
+	List<Railway> SortRailway();
+}
+
+
+application.propertise
+
+#Tomcat server port number 8080
+server.port=7070
+#context path default value : empty
+#server.servlet.context-path=/ems
+server.servlet.session.persistent=false
+#DB properties
+spring.datasource.url=jdbc:mysql://localhost:3306/ExamADV?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true
+spring.datasource.username=root
+spring.datasource.password=root
+# JPA properties
+spring.jpa.show-sql = true
+spring.jpa.hibernate.ddl-auto = update
+spring.jpa.properties.hibernate.dialect = org.hibernate.dialect.MySQL8Dialect
+#logging.level.org.springframework.orm.hibernate5=DEBUG
+
+# Spring MVC ViewResolver related
+#spring.mvc.view.prefix=/WEB-INF/views
+#spring.mvc.view.suffix=.jsp
+#Disable open session in view 
+spring.jpa.open-in-view=false
+#property to disable hibernateLazyInitializer during initialized proxies
+#spring.jackson.serialization.FAIL_ON_EMPTY_BEANS=false
+
+
+
+
