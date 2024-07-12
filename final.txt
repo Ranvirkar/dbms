@@ -1,5 +1,21 @@
 http://localhost:7070/swagger-ui/index.html#/railway-controller/update
 http://localhost:7070/swagger-ui/index.html
+json format
+{
+    "id": 1,
+    "name": "Duranto",
+    "category": "METRO",
+    "startTime": "12:02:30",
+    "endTime": "13:03:50",
+    "source": "Udgir",
+    "destination": "pune",
+    "code": 123,
+    "distance": 452,
+    "frequency": 25
+  }
+
+
+
 src/main/java
 
 Application.java
