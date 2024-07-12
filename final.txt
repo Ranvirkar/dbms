@@ -1,5 +1,5 @@
 http://localhost:7070/swagger-ui/index.html#/railway-controller/update
-
+http://localhost:7070/swagger-ui/index.html
 src/main/java
 
 Application.java
